@@ -31,8 +31,6 @@ def info_printer(info):
 
 def get_show_info(show):
 	""" Returns the info of a show """
-
-	# Build the show url
 	parsed_show = show.lower().replace(" ", "-")
 	show_url = main_url + show_suffix.format(parsed_show)
 
@@ -57,15 +55,11 @@ def get_show_info(show):
 
 def get_episodes_from_show(show, episode=None):
 	""" Download all the episodes from a given show """
-
-	# Build the show url
 	parsed_show = show.lower().replace(" ", "-")
 	show_url = main_url + show_suffix.format(parsed_show)
 
-	# Get the show page
 	show_soup = get_page_soup(show_url)
 
-	# Acquire all the episode urls from the show page
 	links = show_soup.find("ul", {"class": ["episodes", "range", "active"]}).findAll("a")
 	episode_urls = [l.get('href') for l in links]
 
@@ -94,23 +88,19 @@ def get_arguments(args=None):
 	""" Returns the arguments from the console """
 
 	parser = argparse.ArgumentParser(description="4anime.to downloader")
-	parser.add_argument("--show", help="The show to download")
-	parser.add_argument("--info", help="The show to download")
-	parser.add_argument("--episode", help="A specific episode, default: all")
-	parser.add_argument("--threads", help="Number of maximum threads")
+	parser.add_argument("-d","--download", help="The show to download")
+	parser.add_argument("-i","--info", help="Get Info from a specific show")
+	parser.add_argument("-e","--episode", type=int, help="A specific episode, default: all")
+	parser.add_argument("-t","--threads", type= int, default=10, help="Number of maximum threads")
 
 	r = parser.parse_args(args)
-	return (r.show, r.info, r.episode, r.threads)
+	return (r.download, r.info, r.episode, r.threads)
 
 if __name__ == "__main__":
-	show, info, episode, threads = get_arguments(sys.argv[1:])
+	download, info, episode, threads = get_arguments(sys.argv[1:])
 
 	if info is not None:
 		get_show_info(info)
-
-	if threads is None:
-		downloader = FileDownloader()
-	else:
-		downloader = FileDownloader(max_threads=int(threads))
 	
-	get_episodes_from_show(show, episode=int(episode))
+	downloader = FileDownloader(max_threads=threads)
+	get_episodes_from_show(download, episode=episode)
