@@ -7,6 +7,7 @@ A scraper where you can download anime shows from 4anime.to
 --download / -d Downloads the given show, defaults to downlaod all of the episodes
 --info / -i Prints the info of a given show
 --popular / -p Prints the popular shows of the week
+--recent / -r Prints the recently added shows of the week
 --episode / -e Download a specific episode from a show
 --threads / -t Specify the amount of threads with which you want to download with
 ```
@@ -29,6 +30,20 @@ Studio:          Seven
 Release Date:    Spring 2019
 Status:          Currently Airing
 Language:        Subbed
+```
+
+```
+python 4anime.py -r 3
+
+Recently added shows. Page: 3
+
+Chou Kadou Girl ⅙: Amazing Stranger           Episode 02
+Cardfight!! Vanguard (2018)                   Episode 49
+Detective Conan                               Episode 936
+Mix: Meisei Story                             Episode 02
+Hitoribocchi no Marumaru Seikatsu             Episode 02
+Midara na Ao-chan wa Benkyou ga Dekinai       Episode 02
+Senryuu Shoujo                                Episode 02
 ```
 
 Default file location is the working directory of the script in a created folder called /Downloads
