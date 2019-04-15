@@ -6,6 +6,7 @@ A scraper where you can download anime shows from 4anime.to
 ```
 --download / -d Downloads the given show, defaults to downlaod all of the episodes
 --info / -i Prints the info of a given show
+--popular / -p Prints the popular shows of the week
 --episode / -e Download a specific episode from a show
 --threads / -t Specify the amount of threads with which you want to download with
 ```
