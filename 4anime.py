@@ -49,7 +49,8 @@ def get_show_info(show):
 			d += f"{detail.contents[0]} "
 		details.append(d)
 	
-	num_of_episodes = len(info_soup.find("ul", {"class": ["episodes", "range", "active"]}).findAll("a"))
+	eps = info_soup.find("ul", {"class": ["episodes", "range", "active"]}).findAll("a")
+	num_of_episodes = eps[len(eps) - 1].contents[0]
 
 	info_printer({"title":show, "num_eps":num_of_episodes, "genres":genres_string, "details":details})
 	exit()
@@ -74,7 +75,7 @@ def parse_frontpage_title(div):
 	
 	return shows
 
-def get_popular_week(page):
+def get_popular_week(page=1):
 	""" Prints all the shows that contain the search input """
 	search_soup = get_page_soup(main_url + page_suffix.format(page))
 	popular_div = search_soup.find("div", {"id": "populartodaycontent"})
@@ -86,7 +87,7 @@ def get_popular_week(page):
 	
 	exit()
 
-def get_recently_added(page):
+def get_recently_added(page=1):
 	""" Prints all the episode that were recently added """
 	search_soup = get_page_soup(main_url + page_suffix.format(page))
 	recent_div = search_soup.find("div", {"id": "urcontent"})
@@ -135,23 +136,22 @@ def get_arguments(args=None):
 	parser = argparse.ArgumentParser(description="4anime.to downloader")
 	parser.add_argument("-d","--download", nargs="+", help="The show to download")
 	parser.add_argument("-i","--info", nargs="+", help="Get Info from a specific show")
-	parser.add_argument("-p","--popular", action='store_true', help="Returns the popular show of this week")
-	parser.add_argument("-r","--recent", action='store_true', help="Returns the recently added shows of this week")
-	parser.add_argument("--page", type=int, default=1, help="A specific page from the popular or recent page, default: 1")
-	parser.add_argument("-e","--episode", type=int, help="A specific episode, default: all")
+	parser.add_argument("-p","--popular", type=int, help="Returns the popular show of this week")
+	parser.add_argument("-r","--recent", type=int, help="Returns the recently added shows of this week")
+	parser.add_argument("-e","--episode", type=int, help="A specific episode")
 	parser.add_argument("-t","--threads", type= int, default=10, help="Number of maximum threads")
 
 	r = parser.parse_args(args)
-	return (r.download, r.info, r.popular, r.recent, r.page, r.episode, r.threads)
+	return (r.download, r.info, r.popular, r.recent, r.episode, r.threads)
 
 if __name__ == "__main__":
-	download, info, popular, recent, page, episode, threads = get_arguments(sys.argv[1:])
+	download, info, popular, recent, episode, threads = get_arguments(sys.argv[1:])
 	
-	if popular:
-		get_popular_week(page)
+	if popular is not None:
+		get_popular_week(popular)
 
-	if recent:
-		get_recently_added(page)
+	if recent is not None:
+		get_recently_added(recent)
 
 	if info is not None:
 		info = "-".join(info)
