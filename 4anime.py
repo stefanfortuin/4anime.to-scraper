@@ -31,7 +31,7 @@ def info_printer(info):
 
 def get_show_info(show):
 	""" Returns the info of a show """
-	parsed_show = show.lower().replace(" ", "-")
+	parsed_show = show.lower()
 	show_url = main_url + show_suffix.format(parsed_show)
 
 	info_soup = get_page_soup(show_url)
@@ -53,9 +53,26 @@ def get_show_info(show):
 	info_printer({"title":show, "num_eps":num_of_episodes, "genres":genres_string, "details":details})
 	exit()
 
+def get_popular_week():
+	""" Prints all the shows that contain the search input """
+	search_soup = get_page_soup(main_url)
+	popular_div = search_soup.find("div", {"id": "populartodaycontent"})
+	popular_shows = []
+
+	for show in popular_div.findAll("img", {"id": "headerIMG_6"}):
+		src = show.get('src')
+		name = re.search(r"image\/(.+(?=\.))", src).group(1).replace("-", " ").replace("Cover", " ")
+		popular_shows.append(name)
+
+	print("Popular this week: \n")
+	for s in popular_shows:
+		print(s)
+	
+	exit()
+
 def get_episodes_from_show(show, episode=None):
 	""" Download all the episodes from a given show """
-	parsed_show = show.lower().replace(" ", "-")
+	parsed_show = show.lower()
 	show_url = main_url + show_suffix.format(parsed_show)
 
 	show_soup = get_page_soup(show_url)
@@ -88,19 +105,26 @@ def get_arguments(args=None):
 	""" Returns the arguments from the console """
 
 	parser = argparse.ArgumentParser(description="4anime.to downloader")
-	parser.add_argument("-d","--download", help="The show to download")
-	parser.add_argument("-i","--info", help="Get Info from a specific show")
+	parser.add_argument("-d","--download", nargs="+", help="The show to download")
+	parser.add_argument("-i","--info", nargs="+", help="Get Info from a specific show")
+	parser.add_argument("-p","--popular", action='store_true', help="Returns the popular show of this week")
 	parser.add_argument("-e","--episode", type=int, help="A specific episode, default: all")
 	parser.add_argument("-t","--threads", type= int, default=10, help="Number of maximum threads")
 
 	r = parser.parse_args(args)
-	return (r.download, r.info, r.episode, r.threads)
+	return (r.download, r.info, r.popular, r.episode, r.threads)
 
 if __name__ == "__main__":
-	download, info, episode, threads = get_arguments(sys.argv[1:])
+	download, info, popular, episode, threads = get_arguments(sys.argv[1:])
+	
+	
+	if popular:
+		get_popular_week()
 
 	if info is not None:
+		info = "-".join(info)
 		get_show_info(info)
 	
+	download = "-".join(download)
 	downloader = FileDownloader(max_threads=threads)
 	get_episodes_from_show(download, episode=episode)
