@@ -6,6 +6,7 @@ from Downloader.DownloaderThreaded import FileDownloader
 # initialize some variables
 main_url = "https://4anime.to"
 show_suffix = "/anime/{0}"
+page_suffix = "/page/{0}"
 
 def get_page_soup(url):
 	""" Returns a beautifulsoup object from the given url"""
@@ -53,21 +54,48 @@ def get_show_info(show):
 	info_printer({"title":show, "num_eps":num_of_episodes, "genres":genres_string, "details":details})
 	exit()
 
-def get_popular_week():
+def parse_frontpage_title(div):
+	""" Gets the title of the recently added or popular of the weeks shows """
+	shows = []
+
+	for div in div.findAll("div", {"id": "headerDIV_4"}):
+		for link in div.findAll("a"):
+			if link.get('id') == "headerA_5":
+				alt = link.get('alt')
+				if alt is None:
+					alt = link.find("img").get('alt')
+				name = alt
+
+			if link.get('id') == "headerA_8":
+				data = link.contents[0]
+
+		show = "{:<45} {:<20}".format(name, data)
+		shows.append(show)
+	
+	return shows
+
+def get_popular_week(page):
 	""" Prints all the shows that contain the search input """
-	search_soup = get_page_soup(main_url)
+	search_soup = get_page_soup(main_url + page_suffix.format(page))
 	popular_div = search_soup.find("div", {"id": "populartodaycontent"})
-	popular_shows = []
+	popular_shows = parse_frontpage_title(popular_div)
 
-	for show in popular_div.findAll("img", {"id": "headerIMG_6"}):
-		src = show.get('src')
-		name = re.search(r"image\/(.+(?=\.))", src).group(1).replace("-", " ").replace("Cover", " ")
-		popular_shows.append(name)
-
-	print("Popular this week: \n")
+	print(f"Popular this week. Page: {page} \n")
 	for s in popular_shows:
 		print(s)
 	
+	exit()
+
+def get_recently_added(page):
+	""" Prints all the episode that were recently added """
+	search_soup = get_page_soup(main_url + page_suffix.format(page))
+	recent_div = search_soup.find("div", {"id": "urcontent"})
+	recent_shows = parse_frontpage_title(recent_div)
+
+	print(f"Recently added shows. Page: {page} \n")
+	for s in recent_shows:
+		print(s)
+
 	exit()
 
 def get_episodes_from_show(show, episode=None):
@@ -108,18 +136,22 @@ def get_arguments(args=None):
 	parser.add_argument("-d","--download", nargs="+", help="The show to download")
 	parser.add_argument("-i","--info", nargs="+", help="Get Info from a specific show")
 	parser.add_argument("-p","--popular", action='store_true', help="Returns the popular show of this week")
+	parser.add_argument("-r","--recent", action='store_true', help="Returns the recently added shows of this week")
+	parser.add_argument("--page", type=int, default=1, help="A specific page from the popular or recent page, default: 1")
 	parser.add_argument("-e","--episode", type=int, help="A specific episode, default: all")
 	parser.add_argument("-t","--threads", type= int, default=10, help="Number of maximum threads")
 
 	r = parser.parse_args(args)
-	return (r.download, r.info, r.popular, r.episode, r.threads)
+	return (r.download, r.info, r.popular, r.recent, r.page, r.episode, r.threads)
 
 if __name__ == "__main__":
-	download, info, popular, episode, threads = get_arguments(sys.argv[1:])
-	
+	download, info, popular, recent, page, episode, threads = get_arguments(sys.argv[1:])
 	
 	if popular:
-		get_popular_week()
+		get_popular_week(page)
+
+	if recent:
+		get_recently_added(page)
 
 	if info is not None:
 		info = "-".join(info)
