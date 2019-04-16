@@ -76,7 +76,7 @@ def parse_frontpage_title(div):
 	return shows
 
 def get_popular_week(page=1):
-	""" Prints all the shows that contain the search input """
+	""" Prints all the shows that are popular this week"""
 	search_soup = get_page_soup(main_url + page_suffix.format(page))
 	popular_div = search_soup.find("div", {"id": "populartodaycontent"})
 	popular_shows = parse_frontpage_title(popular_div)
@@ -127,7 +127,6 @@ def download_episode(episode_url):
 	episode_url = episode_soup.find("source").get('src')
 	file_name = re.search(r"me(.+)", episode_url).group(1)
 
-	print("downloading episode: " + file_name)
 	downloader.get_file(episode_url, file_name)
 
 def get_arguments(args=None):
@@ -136,22 +135,19 @@ def get_arguments(args=None):
 	parser = argparse.ArgumentParser(description="4anime.to downloader")
 	parser.add_argument("-d","--download", nargs="+", help="The show to download")
 	parser.add_argument("-i","--info", nargs="+", help="Get Info from a specific show")
-	parser.add_argument("-p","--popular", type=int, help="Returns the popular show of this week")
-	parser.add_argument("-r","--recent", type=int, help="Returns the recently added shows of this week")
-	parser.add_argument("-e","--episode", type=int, help="A specific episode")
-	parser.add_argument("-t","--threads", type= int, default=10, help="Number of maximum threads")
+	parser.add_argument("-p","--popular", type=int, metavar="Page Number", help="Returns the popular show of this week")
+	parser.add_argument("-r","--recent", type=int, metavar="Page Number", help="Returns the recently added shows of this week")
+	parser.add_argument("-e","--episode", type=int, metavar="Episode Number", help="A specific episode")
+	parser.add_argument("-t","--threads", type= int, default=10, metavar="Thread Amount", help="Number of maximum threads")
 
 	r = parser.parse_args(args)
 	return (r.download, r.info, r.popular, r.recent, r.episode, r.threads)
 
 if __name__ == "__main__":
 	download, info, popular, recent, episode, threads = get_arguments(sys.argv[1:])
-	
-	if popular is not None:
-		get_popular_week(popular)
 
-	if recent is not None:
-		get_recently_added(recent)
+	if popular is not None: get_popular_week(popular)
+	if recent is not None: get_recently_added(recent)
 
 	if info is not None:
 		info = "-".join(info)
