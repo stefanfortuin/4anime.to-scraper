@@ -1,3 +1,7 @@
+# WARNING
+Since this is a webscraper this can and will break at some point.
+Fixes to this won't be actively maintained
+
 # 4anime.to-scraper
 A scraper where you can download anime shows from 4anime.to 
 
